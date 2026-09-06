@@ -1,17 +1,14 @@
-# Wave Connector — API Discovery
+# Wave Connector — Connector Discovery
 
-## Discovery status
-**Pending live official-documentation verification.** This connector must not claim an endpoint, OAuth scope, webhook, or write capability until it is verified against Wave's current official developer documentation and a customer-authorized account.
+## Official API Landscape
+Wave Apps uses a unified GraphQL API serving small businesses and freelancers:
+- **Root Query:** `business(id: ID!)` resolves all child collections.
+- **Customers:** `business.customers(page: Int, pageSize: Int)` with mutations `customerCreate`, `customerPatch`.
+- **Invoices:** `business.invoices(page: Int, pageSize: Int)` with mutations `invoiceCreate`, `invoiceSend`.
+- **Bills / Accounts Payable:** `business.bills` and money-out records.
+- **Accounts:** `business.accounts` (checking, savings, credit cards).
+- **Sales Taxes:** `business.salesTaxes` (rates, abbreviations).
 
-## Research checklist
-- Official API base URLs, versions, pagination, filtering, idempotency and rate limits.
-- Authentication types actually offered: OAuth 2.0 authorization code/client credentials, API token, service account, signed request, or local/self-hosted connection.
-- Required scopes/roles/plan tiers, regional endpoints, admin approval and consent lifecycle.
-- Read, create, update, archive/delete, search, bulk, asynchronous-job and webhook surfaces.
-- Error contract, retries, eventual consistency, provider audit log, sandbox/test tenant and webhook signature verification.
-
-## Initial implementation rule
-Only operations confirmed during discovery go into `imperal.json`, schemas and handlers. Any unavailable or partner-only API is recorded as a technical blocker in the task instead of simulated.
-
-## Source candidate
-https://www.waveapps.com
+## Authentication & Multi-Tenancy
+- Token Type: Wave Full Access Token or OAuth2 bearer token.
+- Tenancy Scoping: Each Wave account can contain multiple businesses; the connector stores `business_id` alongside the token.

@@ -14,11 +14,15 @@ def _settings_button() -> ui.UINode:
 
 def _help_modal() -> ui.UINode:
     return ui.Modal(
-        trigger=ui.Button("How do I set this up?", variant="ghost", size="sm"),
-        title="Connecting Wave",
+        trigger=ui.Button("How do I connect Wave?", variant="ghost", size="sm"),
+        title="Connecting Wave Apps",
         children=[
             ui.Text(
-                "1. Sign in to your Wave account and navigate to API/Integration or OAuth settings.\n2. Choose your preferred authentication method (OAuth SSO, API Key / Personal Token, or Client Credentials / Service Account).\n3. Authorize or enter your credentials above and click Connect.",
+                "1. Sign in to your Wave account at next.waveapps.com.\n"
+                "2. Navigate to Manage your Profile > Integrations > API Access.\n"
+                "3. Create a Full Access Token and copy it.\n"
+                "4. Find your Business ID from your browser URL or Businesses list (encoded ID, e.g. QnVzaW5lc3M6...).\n"
+                "5. Enter the Full Access Token and Business ID above and click Connect.",
                 variant="body"
             )
         ]
@@ -31,13 +35,24 @@ async def wave_sidebar(ctx, **kwargs) -> ui.UINode:
         gap=3,
         align="stretch",
         children=[
-            ui.Text("Wave", variant="heading"),
-            ui.Stack(
-                direction="v",
-                gap=1,
-                align="stretch",
+            ui.Text("Wave Accounting", variant="heading"),
+            ui.Text("Manage invoices, customers, bills, bank accounts and tax rates via Wave GraphQL API.", variant="caption"),
+            ui.Divider(),
+            ui.Form(
+                submit_label="Connect Wave",
+                action=ui.Call("connect_wave"),
                 children=[
-                    ui.Text("Manage your Wave connections and integrations.", variant="caption"),
+                    ui.Stack(
+                        direction="v",
+                        gap=2,
+                        align="stretch",
+                        children=[
+                            ui.Input(name="label", label="Connection Label", placeholder="e.g. My Freelance Business"),
+                            ui.Input(name="access_token", label="Wave Full Access Token", placeholder="Wave API Access Token", password=True),
+                            ui.Input(name="business_id", label="Business ID", placeholder="e.g. QnVzaW5lc3M6..."),
+                            ui.Input(name="base_url", label="GraphQL Endpoint (Optional)", placeholder="https://gql.waveapps.com/graphql/public"),
+                        ]
+                    )
                 ]
             ),
             ui.Divider(),
@@ -46,66 +61,9 @@ async def wave_sidebar(ctx, **kwargs) -> ui.UINode:
                 gap=2,
                 align="stretch",
                 children=[
-                    ui.Button(
-                        "Sign in with Wave (OAuth / SSO)",
-                        variant="primary",
-                        size="sm",
-                        icon="login"
-                    ),
-                    ui.Divider(),
-                    ui.Text("Or connect via API Key or Service Account", variant="caption"),
-                    ui.Form(
-                        submit_label="Connect Wave",
-                        action=ui.Call("connect_wave"),
-                        children=[
-                            ui.Stack(
-                                direction="v",
-                                gap=2,
-                                align="stretch",
-                                children=[
-                                    ui.Stack(
-                                        direction="v",
-                                        gap=1,
-                                        align="stretch",
-                                        children=[
-                                            ui.Text("Authentication Method", variant="label"),
-                                            ui.Select(
-                                                param_name="auth_mode",
-                                                value="api_key",
-                                                options=[
-                                                    {"label": "API Key / Personal Access Token", "value": "api_key"},
-                                                    {"label": "OAuth 2.0 Bearer Token", "value": "oauth"},
-                                                    {"label": "Client Credentials (Service Account / Machine-to-Machine)", "value": "client_credentials"},
-                                                ]
-                                            ),
-                                        ]
-                                    ),
-                                    ui.Stack(
-                                        direction="v",
-                                        gap=1,
-                                        align="stretch",
-                                        children=[
-                                            ui.Text("Connection Label", variant="label"),
-                                            ui.Input(param_name="label", placeholder="e.g. Production Wave"),
-                                        ]
-                                    ),
-                                    ui.Stack(
-                                        direction="v",
-                                        gap=1,
-                                        align="stretch",
-                                        children=[
-                                            ui.Text("API Key / Access Token", variant="label"),
-                                            ui.Input(param_name="api_key", placeholder="Paste API Key, Bearer or Access Token"),
-                                        ]
-                                    ),
-                                ]
-                            )
-                        ]
-                    ),
+                    _help_modal(),
+                    _settings_button()
                 ]
-            ),
-            _help_modal(),
-            ui.Spacer(),
-            _settings_button(),
+            )
         ]
     )

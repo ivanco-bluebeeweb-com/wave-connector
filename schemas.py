@@ -8,9 +8,10 @@ class NoParams(BaseModel):
     pass
 
 class ConnectParams(BaseModel):
-    label: str = Field(default="", description="Friendly connection label, e.g. Acme Wave.")
-    api_key: str = Field(description="Accounting API Key / OAuth Access Token.")
-    base_url: str = Field(default="", description="Optional custom base URL or instance domain.")
+    label: str = Field(default="", description="Friendly connection label, e.g. Acme Wave Accounting.")
+    access_token: str = Field(description="Wave Apps Full Access API Token / OAuth Token.")
+    business_id: str = Field(description="Wave Business ID (e.g. QnVzaW5lc3M6...) from Wave Settings > Businesses or URL.")
+    base_url: str = Field(default="", description="Optional custom GraphQL endpoint (defaults to https://gql.waveapps.com/graphql/public).")
 
 class ConnectionIdParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier (empty uses active connection).")
@@ -19,6 +20,7 @@ class ConnectionRecord(BaseModel):
     id: str
     label: str
     masked_key: str
+    business_id: str
     base_url: str
     is_active: bool
 
@@ -42,8 +44,8 @@ class GetCustomerParams(BaseModel):
 
 class CreateCustomerParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    name: str = Field(description="Name or title of the customer.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload (email, currency, etc).")
 
 class UpdateCustomerParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -76,8 +78,9 @@ class GetInvoiceParams(BaseModel):
 
 class CreateInvoiceParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    customer_id: str = Field(description="Customer ID this invoice is billed to.")
+    line_items: list[dict[str, Any]] = Field(description="Invoice line items (description, quantity, unit_price).")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Additional details (invoice_date, due_date, currency).")
 
 class UpdateInvoiceParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -90,8 +93,9 @@ class DeleteInvoiceParams(BaseModel):
 
 class InvoiceRecord(BaseModel):
     id: str
-    name: str
-    status: str = "active"
+    customer_id: str = ""
+    status: str = "draft"
+    total: float = 0.0
     raw: dict[str, Any] = {}
 
 class InvoiceList(BaseModel):
@@ -110,8 +114,9 @@ class GetBillParams(BaseModel):
 
 class CreateBillParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    vendor_id: str = Field(description="Vendor identifier.")
+    line_items: list[dict[str, Any]] = Field(description="Bill line items.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Additional details.")
 
 class UpdateBillParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -124,8 +129,9 @@ class DeleteBillParams(BaseModel):
 
 class BillRecord(BaseModel):
     id: str
-    name: str
-    status: str = "active"
+    vendor_id: str = ""
+    status: str = "open"
+    total: float = 0.0
     raw: dict[str, Any] = {}
 
 class BillList(BaseModel):
@@ -144,8 +150,9 @@ class GetPaymentParams(BaseModel):
 
 class CreatePaymentParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    customer_id: str = Field(description="Customer or account ID.")
+    amount: float = Field(description="Payment amount.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Additional details.")
 
 class UpdatePaymentParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
@@ -158,8 +165,8 @@ class DeletePaymentParams(BaseModel):
 
 class PaymentRecord(BaseModel):
     id: str
-    name: str
-    status: str = "active"
+    amount: float = 0.0
+    status: str = "completed"
     raw: dict[str, Any] = {}
 
 class PaymentList(BaseModel):
@@ -174,26 +181,27 @@ class ListBankAccountParams(BaseModel):
 
 class GetBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    bank_account_id: str = Field(description="Unique identifier of the bank_account.")
+    account_id: str = Field(description="Unique identifier of the bank account.")
 
 class CreateBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    name: str = Field(description="Name of the bank account.")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Bank account details.")
 
 class UpdateBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    bank_account_id: str = Field(description="Unique identifier of the bank_account.")
+    account_id: str = Field(description="Unique identifier of the bank account.")
     fields: dict[str, Any] = Field(description="Attributes to update.")
 
 class DeleteBankAccountParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    bank_account_id: str = Field(description="Unique identifier of the bank_account.")
+    account_id: str = Field(description="Unique identifier of the bank account.")
 
 class BankAccountRecord(BaseModel):
     id: str
     name: str
-    status: str = "active"
+    type: str = "checking"
+    balance: float = 0.0
     raw: dict[str, Any] = {}
 
 class BankAccountList(BaseModel):
@@ -208,39 +216,47 @@ class ListTaxRateParams(BaseModel):
 
 class GetTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    tax_rate_id: str = Field(description="Unique identifier of the tax_rate.")
+    tax_rate_id: str = Field(description="Unique identifier of the tax rate.")
 
 class CreateTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    name: str = Field(description="Name or title of the record.")
-    details: Optional[dict[str, Any]] = Field(default=None, description="Detailed attributes and payload.")
+    name: str = Field(description="Name of the tax rate.")
+    rate: float = Field(description="Tax percentage rate (e.g. 5.0).")
+    details: Optional[dict[str, Any]] = Field(default=None, description="Additional tax details.")
 
 class UpdateTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    tax_rate_id: str = Field(description="Unique identifier of the tax_rate.")
+    tax_rate_id: str = Field(description="Unique identifier of the tax rate.")
     fields: dict[str, Any] = Field(description="Attributes to update.")
 
 class DeleteTaxRateParams(BaseModel):
     connection_id: str = Field(default="", description="Connection identifier.")
-    tax_rate_id: str = Field(description="Unique identifier of the tax_rate.")
+    tax_rate_id: str = Field(description="Unique identifier of the tax rate.")
 
 class TaxRateRecord(BaseModel):
     id: str
     name: str
-    status: str = "active"
+    rate: float = 0.0
     raw: dict[str, Any] = {}
 
 class TaxRateList(BaseModel):
     items: list[TaxRateRecord]
     total: int
-    next_cursor: Optional[str] = None
 
 class AuditAccountingHealthResult(BaseModel):
-    summary: str
-    metrics: dict[str, Any]
-    timestamp: str
+    status: str = "ok"
+    total_customers: int = 0
+    total_invoices: int = 0
+    total_bills: int = 0
+    bank_accounts_count: int = 0
+    overdue_invoices_count: int = 0
+    overdue_bills_count: int = 0
+    summary: str = ""
 
 class GetCashFlowSummaryResult(BaseModel):
-    summary: str
-    metrics: dict[str, Any]
-    timestamp: str
+    total_receivables: float = 0.0
+    total_payables: float = 0.0
+    net_cash_flow: float = 0.0
+    currency: str = "USD"
+    bank_accounts: list[dict[str, Any]] = []
+    summary: str = ""

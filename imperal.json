@@ -14,7 +14,7 @@
   "tools": [
     {
       "name": "connect_wave",
-      "description": "Connect Wave account via credentials.",
+      "description": "Connect your own Wave Apps account with full-access API Token and Business ID.",
       "action_type": "write",
       "chain_callable": true,
       "effects": [
@@ -25,24 +25,30 @@
         "properties": {
           "label": {
             "default": "",
-            "description": "Friendly connection label, e.g. Acme Wave.",
+            "description": "Friendly connection label, e.g. Acme Wave Accounting.",
             "title": "Label",
             "type": "string"
           },
-          "api_key": {
-            "description": "Accounting API Key / OAuth Access Token.",
-            "title": "Api Key",
+          "access_token": {
+            "description": "Wave Apps Full Access API Token / OAuth Token.",
+            "title": "Access Token",
+            "type": "string"
+          },
+          "business_id": {
+            "description": "Wave Business ID (e.g. QnVzaW5lc3M6...) from Wave Settings > Businesses or URL.",
+            "title": "Business Id",
             "type": "string"
           },
           "base_url": {
             "default": "",
-            "description": "Optional custom base URL or instance domain.",
+            "description": "Optional custom GraphQL endpoint (defaults to https://gql.waveapps.com/graphql/public).",
             "title": "Base Url",
             "type": "string"
           }
         },
         "required": [
-          "api_key"
+          "access_token",
+          "business_id"
         ],
         "title": "ConnectParams",
         "type": "object"

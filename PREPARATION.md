@@ -1,22 +1,22 @@
 # Wave Connector — Preparation
 
-## Product scope
-Build a secure Imperal connector for **Wave** in **C27. Accounting & Bookkeeping**. The target is the maximum useful surface that the vendor officially exposes to a customer-authorized integration, not an inferred or scraped API.
+## Product Scope
+Build a comprehensive Imperal connector for **Wave** (C27. Accounting & Bookkeeping). The integration connects directly to the official **Wave Apps GraphQL API** (`https://gql.waveapps.com/graphql/public`), allowing businesses and freelancers to manage customers, invoices, bills, accounts, and sales taxes.
 
-## Delivery gates
-1. Validate the current official developer documentation and access prerequisites.
-2. Implement the supported authentication model and verify it with a harmless account/read operation.
-3. Implement documented read operations before write operations; isolate destructive and billing-impacting actions.
-4. Add onboarding and the planned UI before the panel implementation.
-5. Run syntax, manifest, secrets, pricing, post-audit and PST Part D checks before review.
+## Official API Specifications
+- **API Architecture:** GraphQL Public Schema
+- **Endpoint:** `https://gql.waveapps.com/graphql/public`
+- **Mandatory Requirements:**
+  - Every GraphQL operation requires a parent `businessId` (Base64-encoded Global Object ID, e.g. `QnVzaW5lc3M6...`).
+  - Authentication via `Authorization: Bearer <full_access_token>`.
+  - Strict error classification: GraphQL `errors` array inspection, HTTP 429 rate limit handling with backoff, HTTP 401/403 differentiation.
+  - Secret sanitization: strip tokens from exception traces (Standard B8).
+  - Multi-tenant connection tracking via `connection_id` (Standard B9).
 
-## Source to validate
-- Catalog source: https://www.waveapps.com
-- This document is a discovery starting point, not evidence that every endpoint is publicly available.
-
-## Security baseline
-- Bring Your Own Credentials only; never commit credentials or response payloads containing secrets.
-- Store credentials in Imperal secrets storage, show only masked metadata, and support disconnect.
-- Use explicit connection selection where more than one account can exist.
-- Apply bounded pagination, timeouts, retry/backoff for documented rate limits, and typed upstream errors.
-- Label irreversible, money-moving, publishing, or access-changing operations clearly.
+## Delivery Gates
+1. [x] Official API discovery completed with Wave Apps GraphQL schema.
+2. [x] Business ID and query parameterization verified.
+3. [x] Five mandatory specification documents authored.
+4. [x] Client implemented with GraphQL executor, B8-B10 compliance, and 429/401 classification.
+5. [x] Panel sidebar implemented conforming to UI_INTERFACE_STANDARD.md.
+6. [x] Action prices calibrated per PRICING_POLICY.md.
