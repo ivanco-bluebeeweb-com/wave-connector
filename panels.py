@@ -47,10 +47,42 @@ async def wave_sidebar(ctx, **kwargs) -> ui.UINode:
                         gap=2,
                         align="stretch",
                         children=[
-                            ui.Input(name="label", label="Connection Label", placeholder="e.g. My Freelance Business"),
-                            ui.Input(name="access_token", label="Wave Full Access Token", placeholder="Wave API Access Token", password=True),
-                            ui.Input(name="business_id", label="Business ID", placeholder="e.g. QnVzaW5lc3M6..."),
-                            ui.Input(name="base_url", label="GraphQL Endpoint (Optional)", placeholder="https://gql.waveapps.com/graphql/public"),
+                            ui.Stack(
+                                direction="v",
+                                gap=1,
+                                align="stretch",
+                                children=[
+                                    ui.Text("Connection Label", variant="label"),
+                                    ui.Input(param_name="label", placeholder="e.g. My Freelance Business"),
+                                ]
+                            ),
+                            ui.Stack(
+                                direction="v",
+                                gap=1,
+                                align="stretch",
+                                children=[
+                                    ui.Text("Wave Full Access Token", variant="label"),
+                                    ui.Input(param_name="access_token", placeholder="Paste your Wave Full Access Token"),
+                                ]
+                            ),
+                            ui.Stack(
+                                direction="v",
+                                gap=1,
+                                align="stretch",
+                                children=[
+                                    ui.Text("Business ID", variant="label"),
+                                    ui.Input(param_name="business_id", placeholder="e.g. QnVzaW5lc3M6..."),
+                                ]
+                            ),
+                            ui.Stack(
+                                direction="v",
+                                gap=1,
+                                align="stretch",
+                                children=[
+                                    ui.Text("GraphQL Endpoint (Optional)", variant="label"),
+                                    ui.Input(param_name="base_url", placeholder="https://gql.waveapps.com/graphql/public"),
+                                ]
+                            ),
                         ]
                     )
                 ]
