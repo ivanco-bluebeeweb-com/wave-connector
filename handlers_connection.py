@@ -105,7 +105,7 @@ async def list_connections(ctx, params: NoParams) -> ActionResult[ConnectionList
         )
         for c in conns
     ]
-    return ActionResult.success(ConnectionList(connections=records, total=len(records)))
+    return ActionResult.success(ConnectionList(connections=records, total=len(records)), summary="List connections completed successfully.")
 
 @chat.function(
     "disconnect_wave",
@@ -127,4 +127,4 @@ async def disconnect_wave(ctx, params: ConnectionIdParams) -> ActionResult[Delet
     if conns and not any(c.get("is_active") for c in conns):
         conns[0]["is_active"] = True
     await _save_connections(ctx, conns)
-    return ActionResult.success(DeleteResult(id=cid or "all", deleted=True, message="Wave connection removed"))
+    return ActionResult.success(DeleteResult(id=cid or "all", deleted=True, message="Wave connection removed"), summary="Disconnect wave completed successfully.")
