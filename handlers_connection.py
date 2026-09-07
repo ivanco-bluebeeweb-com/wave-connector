@@ -75,7 +75,7 @@ async def connect_wave(ctx, params: ConnectParams) -> ActionResult[ConnectionRec
         c["is_active"] = False
     conns.append(record)
     await _save_connections(ctx, conns)
-    return ActionResult.ok(ConnectionRecord(
+    return ActionResult.success(ConnectionRecord(
         id=cid,
         label=record["label"],
         masked_key=record["masked_key"],
@@ -105,7 +105,7 @@ async def list_connections(ctx, params: NoParams) -> ActionResult[ConnectionList
         )
         for c in conns
     ]
-    return ActionResult.ok(ConnectionList(connections=records, total=len(records)))
+    return ActionResult.success(ConnectionList(connections=records, total=len(records)))
 
 @chat.function(
     "disconnect_wave",
@@ -127,4 +127,4 @@ async def disconnect_wave(ctx, params: ConnectionIdParams) -> ActionResult[Delet
     if conns and not any(c.get("is_active") for c in conns):
         conns[0]["is_active"] = True
     await _save_connections(ctx, conns)
-    return ActionResult.ok(DeleteResult(id=cid or "all", deleted=True, message="Wave connection removed"))
+    return ActionResult.success(DeleteResult(id=cid or "all", deleted=True, message="Wave connection removed"))
