@@ -82,7 +82,7 @@ async def connect_wave(ctx, params: ConnectParams) -> ActionResult[ConnectionRec
         business_id=record["business_id"],
         base_url=record["base_url"],
         is_active=True
-    ))
+    ), summary="Wave account connected successfully.")
 
 @chat.function(
     "list_connections",

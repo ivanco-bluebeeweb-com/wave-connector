@@ -421,7 +421,7 @@ async def audit_accounting_health(ctx, params: ConnectionIdParams) -> ActionResu
         summary="Wave Audit unpaid overdue invoices, open bills and reconciliation status",
         metrics={"status": "healthy", "scanned_at": now_iso, "alerts": 0},
         timestamp=now_iso
-    ))
+    ), summary="Audit accounting health completed.")
 
 @chat.function(
     "get_cash_flow_summary",
@@ -438,4 +438,4 @@ async def get_cash_flow_summary(ctx, params: ConnectionIdParams) -> ActionResult
         summary="Wave One-glance summary of receivables, payables and cash balances",
         metrics={"status": "healthy", "scanned_at": now_iso, "alerts": 0},
         timestamp=now_iso
-    ))
+    ), summary="Get cash flow summary completed.")
