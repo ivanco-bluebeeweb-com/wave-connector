@@ -1,55 +1,26 @@
-# Plausible Scenario Tests (PST) — Wave Connector
+# Scenario Tests - Wave Apps Connector
 
-Method: `Docs/session-notes/SCENARIO_TESTING_STANDARD.md`.
-Scope: End-to-end plausible lifecycle scenarios, CRUD coverage, safety validation, and mock context verification.
+**Last Verified:** 2026-09-07T20:01:34+03:00  
+**Vendor:** Wave Financial Inc. (Wave Apps GraphQL Public API)  
+**Endpoint:** `https://gql.waveapps.com/graphql/public`  
+**Authentication:** Full Access Bearer Token  
+**Business ID:** `QnVzaW5lc3M6ZTY5NTc5ZGYtMWE2Yy00ZjQ5LWEyODktNzc5NDVhMDZiMDMx` (BlueBee Web Development)
 
----
+## Test Execution Summary
 
-## 1. Matrix of Tested Scenarios
+| Operation | Method / Type | Parameters Tested | Status | Result / Detail |
+|---|---|---|---|---|
+| `verify_auth` | GraphQL Query | `query { user { id defaultEmail } businesses { ... } }` | PASS | Connected to user `vlad@bluebeeweb.com` (user id `VXNlcjplYWEwYzcwNy1mMjE2LTQ1ZGEtOWU2ZS1iNjdhMDk2YzE2NDg=`), returned 2 businesses |
+| `list_customers` | GraphQL Query | `limit=10, cursor=""` | PASS | Successfully queried `business.customers(page, pageSize)` |
+| `create_customer` | GraphQL Mutation | `name="Test Business Client Ltd", email="client@example.com"` | PASS | Created customer id `QnVzaW5lc3M6ZTY5NTc5ZGYtMWE2Yy00ZjQ5LWEyODktNzc5NDVhMDZiMDMxO0N1c3RvbWVyOjEwNTI2MzQ2MA==` |
+| `get_customer` | GraphQL Query | `customerId=QnVzaW5lc3M6ZTY5NTc5ZGYtMWE2Yy00ZjQ5LWEyODktNzc5NDVhMDZiMDMxO0N1c3RvbWVyOjEwNTI2MzQ2MA==` | PASS | Successfully fetched customer name, email, phone |
+| `update_customer` | GraphQL Mutation | `name="Test Business Client Ltd (Updated)"` | PASS | Successfully modified customer name |
+| `delete_customer` | GraphQL Mutation | `customerId=QnVzaW5lc3M6ZTY5NTc5ZGYtMWE2Yy00ZjQ5LWEyODktNzc5NDVhMDZiMDMxO0N1c3RvbWVyOjEwNTI2MzQ2MA==` | PASS | Deleted test customer, zero residue |
+| `list_bank_accounts` | GraphQL Query | `limit=10` | PASS | Verified `business.accounts(types: [CASH_AND_BANK])` |
+| `list_invoices` | GraphQL Query | `limit=10` | PASS | Verified `business.invoices(page, pageSize)` |
+| `list_bills` | GraphQL Query | `limit=10` | PASS | Verified `business.bills(page, pageSize)` |
+| `list_payments` | GraphQL Query | `limit=10` | PASS | Verified `business.payments(page, pageSize)` |
+| `list_tax_rates` | GraphQL Query | `limit=10` | PASS | Verified `business.salesTaxes(page, pageSize)` |
 
-### Scenario 1: Harmless Connection & Auth Check
-- **Actions**: `connect_*` -> `list_connections` -> `disconnect_*`
-- **Preconditions**: Valid auth credentials or API key configured in mock context.
-- **Expected Outcome**: Credentials stored securely in encrypted secret storage; credentials masked in list response; successful graceful disconnect.
-- **Assertions**: `result.ok is True`, masked credentials format verified (`***` / prefix-suffix), zero credential leakage in error/log objects.
-
-### Scenario 2: Resource Discovery & Query (Read Path)
-- **Actions**: `list_*` (e.g. entities, records, resources) -> `get_*` by ID
-- **Pagination**: Validated cursor / offset-limit bounded parameters; verifies empty state handling without unhandled exceptions.
-- **Assertions**: Empty collection returns clean typed list, invalid ID returns typed `NOT_FOUND` error, no raw tracebacks.
-
-### Scenario 3: Resource Mutation & Idempotency (Write / Update Path)
-- **Actions**: `create_*` -> `update_*`
-- **Idempotency**: Repeated creation with identical idempotency key or payload; verification of field-level updates.
-- **Assertions**: Mutations respect schema validation; omitted fields remain unchanged; side effects declared and tracked.
-
-### Scenario 4: Safe Deletion & Double-Delete Guard (Part D2)
-- **Actions**: `delete_*` / `cancel_*` called twice on the same target ID.
-- **Assertions**: First call succeeds; second call returns clean `NOT_FOUND` / 404 domain error rather than unhandled exception.
-
-### Scenario 5: Security & Operational Audit (Part D3 / D4)
-- **Audit Tool**: `audit_*_health`
-- **Checks**: Scans active resources, flags stale/unhealthy items, computes risk posture metrics without modifying upstream tenant data.
-- **Security**: Zero SSRF vulnerabilities, strict host allowlist validation, credentials masked in all outputs.
-
----
-
-## 2. Tools Covered
-
-- `connect_wave`: validated contract & error handling
-- `list_connections`: validated contract & error handling
-- `disconnect_wave`: validated contract & error handling
-- `list_customers`: validated contract & error handling
-- `get_customer`: validated contract & error handling
-- `create_customer`: validated contract & error handling
-- `update_customer`: validated contract & error handling
-- `delete_customer`: validated contract & error handling
-
----
-
-## 3. PST Part D Audit Sign-off
-
-- **D1 (Deploy Verification)**: Passed 21/21 (or 22/22) platform deployment checks.
-- **D2 (Idempotency)**: Verified duplicate execution safety on mutation tools.
-- **D3 (Security/SSRF & Secret Leak)**: Verified zero token leakage in responses; external endpoints restricted to verified provider hosts.
-- **D4 (Regression Grep)**: Clean static analysis pass across schemas, clients, and handlers.
+## Zero Residue Verification
+All temporary resources created during live integration testing were explicitly cleaned up via their respective delete mutations. Zero test residue remains on the vendor account.

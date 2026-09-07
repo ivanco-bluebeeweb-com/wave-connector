@@ -127,8 +127,6 @@ class WaveClient:
                             id
                             name
                             email
-                            createdAt
-                            updatedAt
                         }
                     }
                 }
@@ -156,8 +154,6 @@ class WaveClient:
                     firstName
                     lastName
                     phone
-                    createdAt
-                    updatedAt
                 }
             }
         }
